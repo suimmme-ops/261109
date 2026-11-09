@@ -1,13 +1,833 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>261109</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>박수임 · 교실의 문제를 코드로 푸는 선생님</title>
+<meta name="description" content="서울은진초등학교 6학년 담임 박수임의 웹앱·수업 프로젝트·연수 포트폴리오">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Nanum+Pen+Script&display=swap">
+<style>
+/* =========================================================
+   TOKENS
+   ========================================================= */
+:root{
+  --bg:#0a0a0d; --bg-2:#101015; --surface:#15151b; --surface-2:#1c1c24;
+  --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.14);
+  --text:#f3f3f6; --muted:#a3a3b2; --dim:#6c6c7a;
+  --lime:#e6ff5c;
+  --coral:#ff6b6b; --cyan:#1fc7d4; --green:#6fe07a; --violet:#8b7cf6; --blue:#4d7cff; --amber:#ffb84d;
+  --mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --sans:"Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --pen:"Nanum Pen Script", cursive;
+  --r:20px; --r-sm:12px;
+  --max:1180px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;word-break:keep-all}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+img{max-width:100%;display:block}
+::selection{background:var(--lime);color:#111}
+.mono{font-family:var(--mono)}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
+
+/* =========================================================
+   NAV
+   ========================================================= */
+.nav{position:fixed;inset:0 0 auto 0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:18px 32px;transition:background .3s, backdrop-filter .3s}
+.nav.scrolled{background:rgba(10,10,13,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-weight:700;font-size:15px}
+.logo-mark{font-size:34px;line-height:1;transform:translateY(3px);display:inline-block;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.logo:hover .logo-mark{transform:translateY(3px) rotate(180deg)}
+.nav-pill{display:flex;gap:2px;padding:5px;border-radius:999px;background:rgba(28,28,36,.75);border:1px solid var(--line);backdrop-filter:blur(10px)}
+.nav-pill a{position:relative;font-family:var(--mono);font-size:13px;color:var(--muted);padding:8px 16px;border-radius:999px;transition:color .2s, background .2s}
+.nav-pill a:hover{color:var(--text)}
+.nav-pill a.active{color:var(--text);background:rgba(255,255,255,.08)}
+.nav-pill a .ko{position:absolute;left:50%;top:calc(100% + 10px);transform:translateX(-50%) translateY(-4px);font-family:var(--sans);font-size:11px;white-space:nowrap;padding:4px 9px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line);opacity:0;pointer-events:none;transition:.2s}
+.nav-pill a:hover .ko{opacity:1;transform:translateX(-50%) translateY(0)}
+.nav-right{display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:14px;padding:11px 20px;border-radius:999px;transition:transform .2s, background .2s, box-shadow .2s, color .2s;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn-white{background:#fff;color:#111}
+.btn-white:hover{box-shadow:0 0 0 4px rgba(255,255,255,.15)}
+.btn-ghost{color:var(--text);border:1px solid var(--line-2);background:rgba(255,255,255,.03)}
+.btn-ghost:hover{background:rgba(255,255,255,.08)}
+.btn-lime{background:var(--lime);color:#111}
+.btn-lime:hover{box-shadow:0 0 0 5px rgba(230,255,92,.18)}
+.btn .arrow{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#111;color:var(--lime);font-size:13px;transition:transform .25s}
+.btn:hover .arrow{transform:rotate(-45deg)}
+.menu-btn{display:none;width:42px;height:42px;border-radius:50%;border:1px solid var(--line-2);font-family:var(--mono)}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+.hero{position:relative;min-height:100vh;min-height:100svh;overflow:hidden;display:flex;flex-direction:column;align-items:center;isolation:isolate}
+.hero-bg{position:absolute;inset:0;z-index:-2;background:
+  radial-gradient(60% 50% at 50% 35%, rgba(77,124,255,.16), transparent 70%),
+  radial-gradient(40% 40% at 80% 70%, rgba(139,124,246,.12), transparent 70%), var(--bg)}
+.spline{position:absolute;left:0;top:0;width:100%;height:100%;border:0;z-index:-1;opacity:0;transition:opacity 1.2s}
+.spline.loaded{opacity:1}
+.hero-shade{position:absolute;inset:0;z-index:-1;pointer-events:none;background:
+  radial-gradient(50% 18% at 50% 22%, rgba(10,10,13,.6), transparent 80%),
+  linear-gradient(to bottom, rgba(10,10,13,.25) 0%, transparent 25%, transparent 55%, var(--bg) 100%)}
+.hero-inner{position:relative;width:100%;max-width:var(--max);padding:118px 24px 0;text-align:center;pointer-events:none}
+.hero-inner a,.hero-inner button{pointer-events:auto}
+.whoami{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:13px;color:var(--muted);padding:7px 14px 7px 8px;border-radius:999px;background:rgba(21,21,27,.7);border:1px solid var(--line);backdrop-filter:blur(8px)}
+.whoami .tag{background:var(--lime);color:#111;font-weight:700;padding:2px 8px;border-radius:999px;font-size:12px}
+.whoami .typed{color:var(--text)}
+.whoami .caret{display:inline-block;width:8px;height:15px;background:var(--lime);margin-left:2px;vertical-align:-2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.hero h1{margin-top:26px;font-size:clamp(40px,7vw,84px);line-height:1.12;font-weight:700;letter-spacing:-.035em}
+.hero h1 .l1{display:block;background:linear-gradient(180deg,#fff 30%,#bdbdc9);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero h1 .l2{display:block;background:linear-gradient(180deg,#e9e9ef 20%,#8f8f9c);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero h1 .pen{font-family:var(--pen);font-weight:400;font-size:1.28em;letter-spacing:0;line-height:.8;padding:0 .06em;background:linear-gradient(100deg,var(--lime),#7cf3e6 60%,#a99cff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stage{height:clamp(180px,27vh,280px);position:relative}
+.stage-hint{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.08em}
+.hero .sub{margin:0 auto;max-width:580px;color:var(--muted);font-size:clamp(15px,1.6vw,17px)}
+.hero .sub b{color:var(--text);font-weight:600}
+.hero-cta{margin-top:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+/* floating cursor tags */
+.cursor-tag{position:absolute;z-index:2;font-size:13px;font-weight:600;color:#fff;padding:5px 12px;border-radius:8px;pointer-events:none;animation:drift 7s ease-in-out infinite}
+.cursor-tag svg{position:absolute;width:18px;height:18px}
+.cursor-tag.t1{left:12%;top:31%;background:#2a8f8c}
+.cursor-tag.t1 svg{right:-14px;top:-12px;transform:scaleX(-1);color:#43c3be}
+.cursor-tag.t2{right:11%;top:47%;background:#e8636b;animation-delay:-3s}
+.cursor-tag.t2 svg{left:-14px;top:-12px;color:#ff7d84}
+@keyframes drift{0%,100%{transform:translate(0,0)}33%{transform:translate(10px,-8px)}66%{transform:translate(-6px,6px)}}
+.sparkle{position:absolute;color:rgba(255,255,255,.35);font-size:14px;pointer-events:none;animation:twinkle 4s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:.9;transform:scale(1.1)}}
+
+/* fan cards */
+.fan{position:relative;width:1060px;height:400px;margin-top:40px;flex-shrink:0;transform-origin:top center}
+.fan-card{position:absolute;bottom:-70px;left:50%;width:250px;height:380px;border-radius:26px;padding:22px;overflow:hidden;color:#fff;
+  transform:translateX(calc(-50% + var(--x))) translateY(var(--y)) rotate(var(--r));transition:transform .5s cubic-bezier(.2,.8,.2,1), box-shadow .4s;
+  box-shadow:0 30px 60px -20px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.35);cursor:pointer}
+.fan-card::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 70% at 30% 0%, rgba(255,255,255,.35), transparent 55%);pointer-events:none}
+.fan-card:hover{transform:translateX(calc(-50% + var(--x))) translateY(calc(var(--y) - 34px)) rotate(var(--r)) scale(1.03);z-index:10 !important}
+.fan-card h3{position:relative;font-size:24px;font-weight:800;letter-spacing:-.03em;line-height:1.2}
+.fan-card .cat{position:relative;font-size:13px;opacity:.8;margin-top:4px;font-family:var(--mono)}
+.fan-card .art{position:absolute;left:50%;bottom:52px;transform:translateX(-50%);width:170px;height:170px;display:grid;place-items:center}
+.fan-card .blob{position:absolute;inset:0;border-radius:42% 58% 55% 45%/50% 45% 55% 50%;background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.75), rgba(255,255,255,.12) 45%, rgba(0,0,0,.18) 100%);box-shadow:inset -12px -16px 30px rgba(0,0,0,.25), 0 20px 40px rgba(0,0,0,.25);animation:morph 9s ease-in-out infinite}
+@keyframes morph{50%{border-radius:58% 42% 45% 55%/45% 55% 45% 55%}}
+.fan-card .emoji{position:relative;font-size:84px;filter:drop-shadow(0 12px 16px rgba(0,0,0,.35));transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.fan-card:hover .emoji{transform:scale(1.12) rotate(-6deg)}
+.fan-card .deco{position:absolute;border-radius:50%;filter:drop-shadow(0 6px 8px rgba(0,0,0,.25))}
+.fan-card .try{position:absolute;top:18px;right:18px;display:flex;align-items:center;gap:8px;background:#fff;color:#111;font-size:13px;font-weight:600;padding:6px 6px 6px 14px;border-radius:999px;z-index:2}
+.fan-card .try i{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--lime);font-style:normal}
+.fan-card.c-coral{background:linear-gradient(160deg,#ff8a7a,#e8475a)}
+.fan-card.c-cyan{background:linear-gradient(160deg,#3fd9e3,#0d8fb0);width:290px;height:420px}
+.fan-card.c-green{background:linear-gradient(160deg,#8ff08a,#2fb35a)}
+.fan-card.c-violet{background:linear-gradient(160deg,#9d8bff,#5a3fd6)}
+.fan-card.c-blue{background:linear-gradient(160deg,#6b95ff,#2d4fd1)}
+
+/* scroll hint */
+.scroll-hint{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);z-index:3;font-family:var(--mono);font-size:11px;color:var(--dim);display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none}
+.scroll-hint span{width:1px;height:28px;background:linear-gradient(var(--dim),transparent);animation:hint 2s ease-in-out infinite}
+@keyframes hint{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* =========================================================
+   INTRO BAND (code profile + stats)
+   ========================================================= */
+.intro{position:relative;padding:40px 0 40px}
+.intro-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:20px;align-items:stretch}
+.code-card{border-radius:var(--r);background:linear-gradient(180deg,#14141a,#101015);border:1px solid var(--line);overflow:hidden;box-shadow:0 40px 80px -40px rgba(0,0,0,.9)}
+.code-head{display:flex;align-items:center;gap:8px;padding:13px 16px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px;color:var(--dim)}
+.dots{display:flex;gap:6px;margin-right:8px}
+.dots i{width:11px;height:11px;border-radius:50%;background:#ff5f57}.dots i:nth-child(2){background:#febc2e}.dots i:nth-child(3){background:#28c840}
+.code-body{padding:22px 24px 26px;font-family:var(--mono);font-size:14.5px;line-height:1.95;overflow-x:auto;white-space:pre;counter-reset:ln}
+.code-body .ln{display:block}
+.code-body .ln::before{counter-increment:ln;content:counter(ln);display:inline-block;width:24px;margin-right:16px;color:#3c3c48;text-align:right}
+.k{color:#c792ea}.v{color:#82aaff}.p{color:#89ddff}.s{color:#c3e88d}.c{color:#5c6370;font-style:italic}.o{color:#f78c6c}
+.stats{display:grid;grid-template-rows:repeat(3,1fr);gap:12px}
+.stat{position:relative;display:flex;align-items:center;justify-content:space-between;padding:22px 26px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);overflow:hidden}
+.stat::after{content:"";position:absolute;right:-40px;top:-40px;width:140px;height:140px;border-radius:50%;background:var(--glow);filter:blur(40px);opacity:.35}
+.stat .num{font-size:clamp(40px,4.4vw,56px);font-weight:800;letter-spacing:-.04em;line-height:1}
+.stat .num small{font-size:.5em;color:var(--muted);font-weight:600;margin-left:2px}
+.stat .lbl{text-align:right;color:var(--muted);font-size:14px}
+.stat .lbl b{display:block;font-family:var(--mono);font-size:12px;color:var(--dim);font-weight:400}
+
+/* =========================================================
+   SECTIONS
+   ========================================================= */
+section.block{padding:120px 0 40px}
+.sec-head{margin-bottom:44px}
+.sec-cmd{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:14px;color:var(--lime);padding:6px 12px;border-radius:8px;background:rgba(230,255,92,.07);border:1px solid rgba(230,255,92,.18)}
+.sec-cmd::before{content:"$";color:var(--dim)}
+.sec-head h2{margin-top:16px;font-size:clamp(30px,4.2vw,48px);font-weight:700;letter-spacing:-.035em;line-height:1.2}
+.sec-head p{margin-top:12px;color:var(--muted);max-width:620px;font-size:16px}
+.sec-head-row{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(28px);transition:opacity .8s cubic-bezier(.2,.8,.2,1), transform .8s cubic-bezier(.2,.8,.2,1)}
+.rv.in{opacity:1;transform:none}
+
+/* ---------- APPS ---------- */
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-size:14px;padding:9px 16px;border-radius:999px;border:1px solid var(--line-2);color:var(--muted);transition:.2s;display:inline-flex;align-items:center;gap:8px}
+.chip:hover{color:var(--text);border-color:rgba(255,255,255,.3)}
+.chip.on{background:#fff;color:#111;border-color:#fff}
+.chip .dot{width:8px;height:8px;border-radius:50%;background:var(--cc,#fff)}
+.chip .n{font-family:var(--mono);font-size:11px;opacity:.6}
+.apps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.app{position:relative;display:flex;flex-direction:column;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);overflow:hidden;transition:transform .35s cubic-bezier(.2,.8,.2,1), border-color .3s, box-shadow .35s}
+.app:hover{transform:translateY(-6px);border-color:color-mix(in srgb,var(--cc) 45%,transparent);box-shadow:0 30px 60px -30px color-mix(in srgb,var(--cc) 60%,transparent)}
+.app.hide{display:none}
+.app-thumb{position:relative;height:168px;display:grid;place-items:center;overflow:hidden;background:linear-gradient(150deg,color-mix(in srgb,var(--cc) 85%,#fff 15%),color-mix(in srgb,var(--cc) 70%,#000 30%))}
+.app-thumb::before{content:"";position:absolute;inset:0;background:radial-gradient(90% 80% at 20% 0%,rgba(255,255,255,.4),transparent 60%)}
+.app-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.app-thumb .emoji{position:relative;font-size:64px;filter:drop-shadow(0 10px 14px rgba(0,0,0,.3));transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.app:hover .app-thumb .emoji{transform:scale(1.12) rotate(-6deg)}
+.badge{position:absolute;top:14px;left:14px;font-size:12px;font-weight:600;padding:4px 10px 4px 8px;border-radius:999px;background:rgba(10,10,13,.6);backdrop-filter:blur(6px);display:flex;align-items:center;gap:6px;z-index:1}
+.badge::before{content:"";width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px #4ade80}
+.badge.dev::before{background:var(--amber);box-shadow:0 0 8px var(--amber)}
+.app-cat{position:absolute;top:14px;right:14px;font-family:var(--mono);font-size:11px;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.22);color:#fff;z-index:1}
+.app-body{flex:1;display:flex;flex-direction:column;padding:20px 20px 18px}
+.app-body h3{font-size:19px;font-weight:700;letter-spacing:-.02em}
+.app-body .sum{margin-top:4px;color:var(--muted);font-size:14.5px}
+.app-body .why{margin-top:14px;font-family:var(--mono);font-size:12.5px;color:#7f8aa3;line-height:1.6}
+.app-meta{margin-top:14px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.app-meta .target{font-size:12.5px;color:var(--dim);margin-right:4px}
+.tag{font-family:var(--mono);font-size:11.5px;padding:3px 8px;border-radius:6px;background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.app-actions{margin-top:auto;padding-top:18px;display:grid;grid-template-columns:1fr 1fr auto;gap:6px}
+.act{font-size:13px;font-weight:600;padding:9px 10px;border-radius:10px;text-align:center;border:1px solid var(--line-2);transition:.2s}
+.act.primary{background:#fff;color:#111;border-color:#fff}
+.act:hover{background:rgba(255,255,255,.08)}
+.act.primary:hover{background:var(--lime);border-color:var(--lime)}
+.act[aria-disabled="true"]{opacity:.38;cursor:not-allowed;pointer-events:auto}
+.act[aria-disabled="true"]:hover{background:transparent}
+.act.primary[aria-disabled="true"]:hover{background:#fff;border-color:#fff}
+
+/* ---------- PROJECTS ---------- */
+.feature{position:relative;border-radius:28px;padding:44px;background:linear-gradient(140deg,#16162a,#121218 60%);border:1px solid var(--line);overflow:hidden}
+.feature::before{content:"";position:absolute;width:520px;height:520px;right:-160px;top:-220px;border-radius:50%;background:radial-gradient(circle,rgba(139,124,246,.35),transparent 65%)}
+.feature-top{position:relative;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:flex-start}
+.feature .label{font-family:var(--mono);font-size:12px;color:var(--violet)}
+.feature h3{margin-top:8px;font-size:clamp(24px,3vw,34px);letter-spacing:-.03em;line-height:1.25}
+.award{font-size:13px;padding:8px 14px;border-radius:999px;background:rgba(230,255,92,.1);color:var(--lime);border:1px solid rgba(230,255,92,.25);white-space:nowrap}
+.formula{position:relative;margin-top:30px;display:flex;align-items:stretch;gap:14px;flex-wrap:wrap}
+.f-box{flex:1;min-width:200px;padding:20px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.f-box b{font-family:var(--mono);font-size:24px;letter-spacing:.04em}
+.f-box p{font-size:14px;color:var(--muted);margin-top:4px}
+.f-box.res{background:linear-gradient(140deg,rgba(230,255,92,.16),rgba(31,199,212,.12));border-color:rgba(230,255,92,.3)}
+.f-op{display:grid;place-items:center;font-family:var(--mono);font-size:24px;color:var(--dim)}
+.subs{position:relative;margin-top:22px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.subp{padding:22px;border-radius:16px;background:rgba(10,10,13,.5);border:1px solid var(--line)}
+.subp h4{display:flex;align-items:center;gap:10px;font-size:17px}
+.subp h4 span{font-size:22px}
+.flow{margin-top:14px;display:grid;gap:8px}
+.flow div{display:grid;grid-template-columns:62px 1fr;gap:10px;font-size:13.5px;color:var(--dim)}
+.flow div b{font-family:var(--mono);font-weight:500;font-size:12px;color:var(--muted)}
+.gitlog{margin-top:22px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);overflow:hidden}
+.commit{display:grid;grid-template-columns:110px 1fr auto;gap:24px;align-items:center;padding:22px 26px;border-top:1px solid var(--line);transition:background .2s}
+.commit:first-child{border-top:0}
+.commit:hover{background:rgba(255,255,255,.025)}
+.commit .hash{font-family:var(--mono);font-size:13px;color:var(--amber)}
+.commit .hash::before{content:"● ";color:var(--dim)}
+.commit h4{font-size:17px;letter-spacing:-.02em}
+.commit p{color:var(--muted);font-size:14px;margin-top:2px}
+.commit .tools{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px}
+
+/* ---------- TALKS ---------- */
+.talks-grid{display:grid;grid-template-columns:1fr 1.25fr;gap:20px;align-items:start}
+.term{border-radius:var(--r);background:#0e0e12;border:1px solid var(--line);overflow:hidden}
+.term-body{padding:8px 0}
+.t-row{display:grid;grid-template-columns:58px 1fr;gap:14px;padding:16px 22px;border-top:1px dashed var(--line)}
+.t-row:first-child{border-top:0}
+.t-row .yr{font-family:var(--mono);font-size:13px;color:var(--cyan)}
+.t-row h4{font-size:15px;font-weight:600;line-height:1.5}
+.t-row p{font-size:13px;color:var(--dim);margin-top:2px}
+.offer-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.offer{position:relative;padding:22px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);transition:.3s;overflow:hidden}
+.offer:hover{border-color:var(--line-2);transform:translateY(-4px)}
+.offer .ico{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:22px;background:var(--bgc)}
+.offer h4{margin-top:16px;font-size:16.5px;line-height:1.4;letter-spacing:-.02em}
+.offer dl{margin-top:14px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px}
+.offer dt{font-family:var(--mono);color:var(--dim);font-size:12px}
+.offer dd{color:var(--muted)}
+.talks-cta{margin-top:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 26px;border-radius:var(--r);background:linear-gradient(100deg,rgba(230,255,92,.1),rgba(31,199,212,.06));border:1px solid rgba(230,255,92,.2);flex-wrap:wrap}
+.talks-cta p{font-size:15px}
+.talks-cta p span{color:var(--muted)}
+
+/* ---------- NOTES ---------- */
+.notes-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.note{position:relative;display:flex;flex-direction:column;padding:22px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);transition:.3s}
+.note:hover{border-color:var(--line-2);transform:translateY(-4px)}
+.note .file{font-family:var(--mono);font-size:12px;color:var(--dim)}
+.note h4{margin-top:10px;font-size:17px;line-height:1.45;letter-spacing:-.02em}
+.note p{margin-top:10px;font-size:14px;color:var(--muted);flex:1}
+.note p code{font-family:var(--mono);font-size:12px;padding:1px 6px;border-radius:5px;background:var(--surface-2);color:#c3e88d;border:1px solid var(--line)}
+.note .tags{margin-top:16px;display:flex;gap:6px;flex-wrap:wrap}
+.note.wide{grid-column:span 2;background:linear-gradient(150deg,#16161d,#121216);border-color:rgba(230,255,92,.18)}
+.note pre{margin-top:14px;padding:18px;border-radius:12px;background:#0b0b0e;border:1px solid var(--line);font-family:var(--mono);font-size:13px;line-height:1.85;color:#d7d7e0;white-space:pre-wrap;flex:1}
+.note pre .h{color:var(--lime)}
+.note pre .ph{color:var(--dim)}
+.copy-btn{position:absolute;top:18px;right:18px;font-family:var(--mono);font-size:12px;padding:7px 12px;border-radius:8px;border:1px solid var(--line-2);transition:.2s}
+.copy-btn:hover{background:rgba(255,255,255,.08)}
+.copy-btn.done{background:var(--lime);color:#111;border-color:var(--lime)}
+
+/* ---------- ABOUT ---------- */
+.about-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px}
+.quote{position:relative;padding:44px;border-radius:28px;background:linear-gradient(150deg,#1a1a24,#121218);border:1px solid var(--line);overflow:hidden}
+.quote::after{content:"”";position:absolute;right:30px;bottom:-60px;font-size:260px;font-family:Georgia,serif;color:rgba(255,255,255,.04);line-height:1}
+.quote .label{font-family:var(--mono);font-size:12px;color:var(--dim)}
+.quote blockquote{margin-top:16px;font-size:clamp(24px,3vw,34px);font-weight:700;letter-spacing:-.03em;line-height:1.35}
+.quote blockquote em{font-style:normal;font-family:var(--pen);font-weight:400;font-size:1.3em;color:var(--lime)}
+.quote p{margin-top:22px;color:var(--muted);font-size:15.5px;max-width:520px}
+.dev-badge{margin-top:26px;display:inline-flex;align-items:center;gap:10px;padding:8px 14px 8px 8px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--line);font-size:13.5px}
+.dev-badge b{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--lime);color:#111;font-family:var(--mono);font-size:13px}
+.about-side{display:grid;gap:20px}
+.panel{padding:26px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line)}
+.panel h4{font-family:var(--mono);font-size:13px;color:var(--dim);font-weight:500;margin-bottom:14px}
+.timeline{list-style:none;display:grid;gap:12px}
+.timeline li{position:relative;padding-left:22px;font-size:14.5px;line-height:1.55}
+.timeline li::before{content:"";position:absolute;left:3px;top:8px;width:8px;height:8px;border-radius:50%;background:var(--lc,var(--muted))}
+.timeline li span{display:block;font-size:12.5px;color:var(--dim)}
+.stack{display:grid;gap:14px}
+.stack-row{display:grid;grid-template-columns:72px 1fr;gap:10px;align-items:start}
+.stack-row b{font-family:var(--mono);font-size:12px;color:var(--muted);font-weight:500;padding-top:4px}
+.stack-row div{display:flex;flex-wrap:wrap;gap:6px}
+
+/* ---------- CONTACT ---------- */
+.contact{position:relative;margin-top:30px;padding:70px 44px;border-radius:32px;text-align:center;overflow:hidden;background:#111116;border:1px solid var(--line)}
+.contact::before{content:"";position:absolute;inset:-40%;background:conic-gradient(from 0deg,rgba(255,107,107,.18),rgba(31,199,212,.18),rgba(111,224,122,.18),rgba(139,124,246,.2),rgba(255,107,107,.18));filter:blur(70px);animation:spin 18s linear infinite}
+.contact > *{position:relative}
+@keyframes spin{to{transform:rotate(360deg)}}
+.contact h2{margin-top:18px;font-size:clamp(30px,4.6vw,54px);letter-spacing:-.035em;line-height:1.2}
+.contact h2 .pen{font-family:var(--pen);font-weight:400;font-size:1.25em;color:var(--lime)}
+.contact > p{margin:14px auto 0;color:var(--muted);max-width:520px}
+.contact-cards{margin:36px auto 0;max-width:760px;display:grid;grid-template-columns:1.4fr 1fr;gap:12px;text-align:left}
+.c-card{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px;border-radius:16px;background:rgba(10,10,13,.6);border:1px solid var(--line-2);backdrop-filter:blur(8px)}
+.c-card small{display:block;font-family:var(--mono);font-size:11.5px;color:var(--dim)}
+.c-card strong{font-size:16px;font-weight:600;font-family:var(--mono)}
+.c-card .copy-btn{position:static}
+.c-note{margin-top:16px;font-size:13px;color:var(--dim)}
+footer{padding:50px 0 40px;display:flex;justify-content:space-between;align-items:center;gap:16px;font-family:var(--mono);font-size:13px;color:var(--dim);flex-wrap:wrap}
+.top-btn{width:46px;height:46px;border-radius:50%;border:1px solid var(--line-2);display:grid;place-items:center;font-size:18px;transition:.2s}
+.top-btn:hover{background:#fff;color:#111}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);z-index:100;padding:11px 18px;border-radius:999px;background:#fff;color:#111;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.3s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width:1080px){
+  .fan{transform:scale(.82);margin-bottom:-72px}
+  .apps-grid{grid-template-columns:repeat(2,1fr)}
+  .notes-grid{grid-template-columns:repeat(2,1fr)}
+  .talks-grid,.about-grid,.intro-grid{grid-template-columns:1fr}
+  .stats{grid-template-rows:none;grid-template-columns:repeat(3,1fr)}
+  .stat{flex-direction:column;align-items:flex-start;gap:10px}
+  .stat .lbl{text-align:left}
+}
+@media (max-width:860px){
+  .nav{padding:14px 18px}
+  .nav-pill{position:absolute;top:70px;left:18px;right:18px;flex-direction:column;border-radius:18px;padding:8px;opacity:0;pointer-events:none;transform:translateY(-8px);transition:.25s;background:rgba(21,21,27,.96)}
+  .nav-pill.open{opacity:1;pointer-events:auto;transform:none}
+  .nav-pill a{padding:12px 14px;border-radius:10px;display:flex;justify-content:space-between}
+  .nav-pill a .ko{position:static;opacity:1;transform:none;background:none;border:0;padding:0;color:var(--dim)}
+  .menu-btn{display:grid;place-items:center}
+  .nav-right .btn-white{display:none}
+  .fan{transform:scale(.6);margin-bottom:-160px;margin-top:40px}
+  .cursor-tag{display:none}
+  .subs{grid-template-columns:1fr}
+  .commit{grid-template-columns:1fr;gap:10px}
+  .contact-cards{grid-template-columns:1fr}
+  .feature,.quote{padding:28px}
+}
+@media (max-width:620px){
+  .apps-grid,.notes-grid,.offer-grid{grid-template-columns:1fr}
+  .note.wide{grid-column:auto}
+  .stats{grid-template-columns:1fr}
+  .stat{flex-direction:row;align-items:center}
+  .stat .lbl{text-align:right}
+  .fan{transform:scale(.42);margin-bottom:-232px}
+  .hero-inner{padding-top:120px}
+  section.block{padding:90px 0 20px}
+  .contact{padding:50px 22px}
+  .code-body{font-size:12.5px;padding:18px 14px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important}
+  .rv{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ======================= NAV ======================= -->
+<header class="nav" id="nav">
+  <a href="#home" class="logo" aria-label="맨 위로"><span class="logo-mark">*</span>suim.dev</a>
+  <nav class="nav-pill" id="navPill" aria-label="주 메뉴">
+    <a href="#home" class="active">~/home<span class="ko">히어로</span></a>
+    <a href="#about">/about<span class="ko">소개</span></a>
+    <a href="#apps">/apps<span class="ko">만든 앱</span></a>
+    <a href="#projects">/projects<span class="ko">수업 프로젝트</span></a>
+    <a href="#talks">/talks<span class="ko">연수·강의</span></a>
+    <a href="#notes">/notes<span class="ko">개발 노트</span></a>
+  </nav>
+  <div class="nav-right">
+    <a href="#contact" class="btn btn-white">연락하기</a>
+    <button class="menu-btn" id="menuBtn" aria-label="메뉴 열기" aria-expanded="false">≡</button>
+  </div>
+</header>
+
+<main>
+<!-- ======================= HERO ======================= -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <iframe class="spline" id="spline" src="https://my.spline.design/aidatamodelinteraction-1pzq29nt6wh9I6u0zMTKdlWw/" title="3D 인터랙션 배경" loading="eager" allow="autoplay"></iframe>
+  <div class="hero-shade"></div>
+
+  <span class="sparkle" style="left:8%;top:62%">✦</span>
+  <span class="sparkle" style="left:30%;top:24%;animation-delay:-1s">✦</span>
+  <span class="sparkle" style="right:24%;top:20%;animation-delay:-2s">✧</span>
+  <span class="sparkle" style="right:8%;top:70%;animation-delay:-3s">✦</span>
+
+  <div class="cursor-tag t1">@6학년 2반<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 2l18 8-8 2.5L10 21z"/></svg></div>
+  <div class="cursor-tag t2">@동료 선생님<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 2l18 8-8 2.5L10 21z"/></svg></div>
+
+  <div class="hero-inner">
+    <div class="whoami"><span class="tag">&gt; whoami</span><span><span class="typed" id="typed"></span><span class="caret"></span> 교사, 박수임</span></div>
+    <h1>
+      <span class="l1">교실의 문제를</span>
+      <span class="l2"><span class="pen">코드</span>로 푸는 선생님</span>
+    </h1>
+    <div class="stage" id="stage" aria-hidden="true"></div>
+    <p class="sub"><b>서울은진초등학교 6학년 담임 박수임</b>입니다. 바이브코딩으로 교실에 필요한 웹앱을 만들고, 누구나 가져다 쓸 수 있게 나눕니다.</p>
+    <div class="hero-cta">
+      <a href="#apps" class="btn btn-lime">만든 앱 둘러보기 <span class="arrow">↓</span></a>
+      <a href="#contact" class="btn btn-ghost">연수·협업 문의</a>
+    </div>
+  </div>
+
+  <div class="fan" id="fan" aria-label="대표 앱"></div>
+  <div class="scroll-hint">scroll<span></span></div>
+</section>
+
+<!-- ======================= INTRO ======================= -->
+<section class="intro">
+  <div class="wrap intro-grid">
+    <div class="code-card rv">
+      <div class="code-head"><span class="dots"><i></i><i></i><i></i></span>teacher.js</div>
+<div class="code-body"><span class="ln"><span class="k">const</span> <span class="v">teacher</span> <span class="p">=</span> <span class="p">{</span></span><span class="ln">  name<span class="p">:</span> <span class="s">"박수임"</span><span class="p">,</span></span><span class="ln">  school<span class="p">:</span> <span class="s">"서울은진초등학교"</span><span class="p">,</span></span><span class="ln">  role<span class="p">:</span> <span class="p">[</span><span class="s">"6학년 담임"</span><span class="p">,</span> <span class="s">"교사 개발자"</span><span class="p">,</span> <span class="s">"AI·에듀테크 강사"</span><span class="p">],</span></span><span class="ln">  stack<span class="p">:</span> <span class="p">[</span><span class="s">"HTML/JS"</span><span class="p">,</span> <span class="s">"Firebase"</span><span class="p">,</span> <span class="s">"Canva Code"</span><span class="p">,</span> <span class="s">"Gemini"</span><span class="p">],</span></span><span class="ln">  belief<span class="p">:</span> <span class="s">"AI는 생각 파트너, 주인공은 학생"</span></span><span class="ln"><span class="p">};</span></span><span class="ln"><span class="c">// 교실의 불편함을 코드로 풀고, 그 해법을 동료와 나눕니다.</span></span></div>
+    </div>
+    <div class="stats">
+      <!-- TODO: 실제 숫자로 바꾸세요 (data-count) -->
+      <div class="stat rv" style="--glow:var(--cyan)"><div class="num"><span data-count="13">0</span><small>개+</small></div><div class="lbl"><b>ls ./apps | wc -l</b>직접 만든 웹앱</div></div>
+      <div class="stat rv" style="--glow:var(--coral)"><div class="num"><span data-count="0" data-placeholder="○○">○○</span><small>회</small></div><div class="lbl"><b>./talks --count</b>교사 연수</div></div>
+      <div class="stat rv" style="--glow:var(--green)"><div class="num"><span data-count="0" data-placeholder="○○">○○</span><small>명</small></div><div class="lbl"><b>who --together</b>함께한 선생님</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= ABOUT ======================= -->
+<section class="block" id="about">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="sec-cmd">cat about.md</span>
+      <h2>인간 중심 디지털 교육</h2>
+    </div>
+    <div class="about-grid">
+      <div class="quote rv">
+        <div class="label"># philosophy</div>
+        <blockquote>AI는 <em>생각 파트너</em>,<br>주인공은 학생입니다.</blockquote>
+        <p>서울은진초등학교 6학년 담임입니다. 교실에서 생긴 불편을 바이브코딩으로 해결하며, 학생 주도성과 메타인지를 키우는 프로젝트 수업을 설계합니다. 만든 도구와 노하우는 연수로 동료 교사와 나눕니다.</p>
+        <div class="dev-badge"><b>#2</b>서울특별시교육청 교사개발자 2호</div>
+      </div>
+      <div class="about-side">
+        <div class="panel rv">
+          <h4>## career</h4>
+          <ul class="timeline">
+            <li style="--lc:var(--cyan)">서울은진초등학교 교사<span>6학년 담임</span></li>
+            <li style="--lc:var(--violet)">숙명여자대학교 AI융합교육 대학원 재학</li>
+            <li style="--lc:var(--lime)">제20회 디지털교육연구대회 전국 입상<span>ACT-WING 프로젝트로 미래시민역량 기르기</span></li>
+            <li style="--lc:var(--coral)">《교사를 위한 AI 에듀테크 수업·생활·업무 대백과》 저자<span>2026</span></li>
+          </ul>
+        </div>
+        <div class="panel rv">
+          <h4>## stack</h4>
+          <div class="stack">
+            <div class="stack-row"><b>dev</b><div><span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">JavaScript</span><span class="tag">Firebase</span><span class="tag">Apps Script</span></div></div>
+            <div class="stack-row"><b>ai</b><div><span class="tag">Gemini</span><span class="tag">뤼튼</span><span class="tag">SEN GPT</span><span class="tag">Canva AI</span></div></div>
+            <div class="stack-row"><b>class</b><div><span class="tag">Canva</span><span class="tag">ZEP</span><span class="tag">Padlet</span><span class="tag">FigJam</span><span class="tag">Mentimeter</span><span class="tag">통그라미</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= APPS ======================= -->
+<section class="block" id="apps">
+  <div class="wrap">
+    <div class="sec-head sec-head-row rv">
+      <div>
+        <span class="sec-cmd">ls ./apps</span>
+        <h2>교실에서 직접 쓰는 웹앱들</h2>
+        <p>모두 실제 우리 반에서 쓰고 있는 앱입니다. 눌러서 체험하고, 마음에 들면 사본을 받아 가세요.</p>
+      </div>
+      <div class="chips" id="chips" role="tablist" aria-label="앱 분류"></div>
+    </div>
+    <div class="apps-grid" id="appsGrid"></div>
+  </div>
+</section>
+
+<!-- ======================= PROJECTS ======================= -->
+<section class="block" id="projects">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="sec-cmd">git log --projects</span>
+      <h2>앱이 수업이 되기까지</h2>
+      <p>도구는 수업을 위해 존재합니다. 학생들이 직접 사회 문제를 풀어 간 프로젝트입니다.</p>
+    </div>
+
+    <article class="feature rv">
+      <div class="feature-top">
+        <div>
+          <div class="label">// featured · HEAD → main</div>
+          <h3>ACT-WING 프로젝트<br>미래시민역량 기르기</h3>
+        </div>
+        <span class="award">🏆 제20회 디지털교육연구대회 출품</span>
+      </div>
+      <div class="formula">
+        <div class="f-box"><b style="color:var(--cyan)">ACT</b><p>디지털 활용 전략 → <strong style="color:var(--text)">주도성</strong></p></div>
+        <div class="f-op">×</div>
+        <div class="f-box"><b style="color:var(--coral)">WING</b><p>사회문제 해결 → <strong style="color:var(--text)">시민성</strong></p></div>
+        <div class="f-op">=</div>
+        <div class="f-box res"><b style="color:var(--lime);font-family:var(--sans);letter-spacing:-.02em">미래시민역량</b><p>스스로 묻고, 함께 해결하는 힘</p></div>
+      </div>
+      <div class="subs">
+        <!-- TODO: 하위 프로젝트 내용 채우기 -->
+        <div class="subp"><h4><span>🤝</span>인권 존중</h4><div class="flow"><div><b>문제</b>[문제 상황 한 줄]</div><div><b>활동</b>[학생 활동]</div><div><b>도구</b>[사용 도구]</div><div><b>결과물</b>[결과물]</div></div></div>
+        <div class="subp"><h4><span>🌏</span>기후 행동</h4><div class="flow"><div><b>문제</b>[문제 상황 한 줄]</div><div><b>활동</b>[학생 활동]</div><div><b>도구</b>[사용 도구]</div><div><b>결과물</b>[결과물]</div></div></div>
+        <div class="subp"><h4><span>🌈</span>다문화 공존</h4><div class="flow"><div><b>문제</b>[문제 상황 한 줄]</div><div><b>활동</b>[학생 활동]</div><div><b>도구</b>[사용 도구]</div><div><b>결과물</b>[결과물]</div></div></div>
+      </div>
+    </article>
+
+    <div class="gitlog rv" id="gitlog"></div>
+  </div>
+</section>
+
+<!-- ======================= TALKS ======================= -->
+<section class="block" id="talks">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="sec-cmd">./talks --list</span>
+      <h2>함께 배운 시간들</h2>
+      <p>코딩을 몰라도 괜찮습니다. 내 수업에 필요한 앱을 직접 만드는 경험을 나눕니다.</p>
+    </div>
+    <div class="talks-grid">
+      <div class="term rv">
+        <div class="code-head"><span class="dots"><i></i><i></i><i></i></span>history --talks</div>
+        <div class="term-body">
+          <!-- TODO: 날짜·횟수 실제 값으로 -->
+          <div class="t-row"><span class="yr">2026</span><div><h4>〈교사 개발자의 날〉 바이브코딩 해커톤 기획·홍보 참여</h4><p>서울특별시교육청 교사개발자</p></div></div>
+          <div class="t-row"><span class="yr">2026</span><div><h4>캔바 2.0 살펴보기 — Canva AI, Canva Code, SEN GPT 바이브코딩 연수·웨비나</h4><p>센스쿨(SEN School) × Canva</p></div></div>
+          <div class="t-row"><span class="yr">2026</span><div><h4>학부모·학생 micro:bit 코딩 워크숍 (90분)</h4><p>학교</p></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="offer-grid">
+          <div class="offer rv" style="--bgc:rgba(230,255,92,.14)"><div class="ico">⚡</div><h4>처음 만나는 바이브코딩: 우리 반 앱 만들기</h4><dl><dt>대상</dt><dd>코딩 경험 없는 교사</dd><dt>시간</dt><dd>90~120분</dd><dt>결과물</dt><dd>내 학급용 웹앱 1개</dd></dl></div>
+          <div class="offer rv" style="--bgc:rgba(31,199,212,.15)"><div class="ico">🎨</div><h4>Canva로 수업 자료부터 웹앱까지</h4><dl><dt>대상</dt><dd>초등 교사</dd><dt>시간</dt><dd>90분</dd><dt>결과물</dt><dd>수업 자료 + Canva Code 앱</dd></dl></div>
+          <div class="offer rv" style="--bgc:rgba(139,124,246,.18)"><div class="ico">🧠</div><h4>AI 생각파트너와 프로젝트 수업 설계</h4><dl><dt>대상</dt><dd>교사 연구회</dd><dt>시간</dt><dd>120분</dd><dt>결과물</dt><dd>프로젝트 수업 설계안</dd></dl></div>
+          <div class="offer rv" style="--bgc:rgba(255,107,107,.16)"><div class="ico">👨‍👩‍👧</div><h4>가족과 함께하는 micro:bit</h4><dl><dt>대상</dt><dd>학부모·학생</dd><dt>시간</dt><dd>90분</dd><dt>결과물</dt><dd>LED·버튼·소리 작품</dd></dl></div>
+        </div>
+        <div class="talks-cta rv"><p>우리 학교·연구회에 맞춰 구성할 수 있어요. <span>대상과 시간만 알려 주세요.</span></p><a href="#contact" class="btn btn-lime">연수 문의하기 <span class="arrow">→</span></a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= NOTES ======================= -->
+<section class="block" id="notes">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="sec-cmd">cat ./notes/*.md</span>
+      <h2>삽질에서 건진 팁</h2>
+      <p>앱을 만들며 막혔던 지점과 해결법을 정리했습니다. 같은 곳에서 멈추지 않도록.</p>
+    </div>
+    <div class="notes-grid">
+      <article class="note rv"><span class="file">01-gas-deploy.md</span><h4>구글 앱스 스크립트 배포 시 막히는 3가지</h4><p><code>onclick</code> 대신 <code>addEventListener</code>, 차단되는 <code>prompt/alert</code>는 자체 모달로, 링크가 갇히면 <code>&lt;base target="_top"&gt;</code>.</p><div class="tags"><span class="tag">GAS</span><span class="tag">배포</span></div></article>
+      <article class="note rv"><span class="file">02-storage.md</span><h4>localStorage vs Firebase, 언제 뭘 쓸까</h4><p>혼자 쓰는 앱은 localStorage로 충분합니다. 반 전체가 같은 화면을 함께 봐야 한다면 Firebase로.</p><div class="tags"><span class="tag">데이터</span></div></article>
+      <article class="note rv"><span class="file">03-encoding.md</span><h4>AI가 만든 코드, 한글이 깨질 때</h4><p>먼저 파일 인코딩(UTF-8)과 <code>&lt;meta charset&gt;</code>을 확인하고, 외부 CDN 의존을 줄이면 대부분 해결됩니다.</p><div class="tags"><span class="tag">디버깅</span></div></article>
+      <article class="note rv"><span class="file">04-popup-lang.md</span><h4>브라우저 팝업이 영어로 뜨는 이유</h4><p>기본 확인창은 시스템 언어를 따릅니다. 학생용 앱이라면 처음부터 자체 모달로 바꿔 두세요.</p><div class="tags"><span class="tag">UI</span></div></article>
+      <article class="note rv"><span class="file">05-copy-link.md</span><h4>학생이 클릭 한 번으로 사본 받게 하기</h4><p>구글독스 공유 링크 끝의 <code>edit</code>를 <code>copy</code>로 바꿔 패들렛에 올리면 끝.</p><div class="tags"><span class="tag">구글</span></div></article>
+      <article class="note rv"><span class="file">06-senschool.md</span><h4>센스쿨 연동으로 Canva·ZEP 교육용 쓰기</h4><p>센스쿨 계정으로 연동하면 별도 인증 없이 교육용 전 기능을 쓸 수 있습니다.</p><div class="tags"><span class="tag">도구</span></div></article>
+      <article class="note wide rv">
+        <button class="copy-btn" data-copy-target="promptTpl">⧉ 복사</button>
+        <span class="file">07-prompt-template.md</span>
+        <h4>내가 쓰는 앱 제작 프롬프트 템플릿</h4>
+        <pre id="promptTpl"><span class="h">[목적]</span> 우리 반 <span class="ph">______</span>을(를) 위한 웹앱을 만들어 줘.
+<span class="h">[사용자]</span> <span class="ph">__</span>학년 학생 / 교사. 태블릿과 전자칠판에서 사용.
+<span class="h">[기능]</span> 1. <span class="ph">______</span>  2. <span class="ph">______</span>  3. <span class="ph">______</span>
+<span class="h">[제약]</span> 단일 HTML 파일, 외부 라이브러리 없이. 한국어 UI.
+       alert/prompt 대신 자체 모달. 학생 실명은 저장하지 않기.</pre>
+        <div class="tags"><span class="tag">프롬프트</span></div>
+      </article>
+      <article class="note rv" style="justify-content:center;align-items:flex-start;border-style:dashed;background:transparent"><span class="file">08-next.md</span><h4 style="color:var(--muted)">다음 노트 작성 중…</h4><p>막혔던 지점이 있다면 알려 주세요. 함께 정리합니다.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= CONTACT ======================= -->
+<section class="block" id="contact">
+  <div class="wrap">
+    <div class="contact rv">
+      <span class="sec-cmd">contact --teacher</span>
+      <h2>같이 <span class="pen">만들어</span> 볼까요?</h2>
+      <p>연수 요청, 앱 사용 후기, 같이 만들고 싶은 아이디어 모두 환영합니다.</p>
+      <div class="contact-cards">
+        <div class="c-card"><div><small>email · 연수 문의 · 앱 후기·제안</small><strong id="email">dpsel7@sen.go.kr</strong></div><button class="copy-btn" data-copy-target="email">⧉ 복사</button></div>
+        <a class="c-card" href="https://www.instagram.com/sendevkorea/" target="_blank" rel="noopener"><div><small>instagram</small><strong>@sendevkorea</strong></div><span style="font-size:18px">↗</span></a>
+      </div>
+      <p class="c-note">학생 정보가 담긴 자료는 공유하지 않습니다. 모든 데모는 샘플 데이터로 동작해요.</p>
+    </div>
+    <footer>
+      <span>© 2026 박수임 · Built with vibe coding</span>
+      <a href="#home" class="top-btn" aria-label="맨 위로">↑</a>
+    </footer>
+  </div>
+</section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   DATA — 여기만 고치면 앱 카드가 바뀝니다.
+   links: 비워 두면 버튼이 '준비 중'으로 표시됩니다.
+   thumbnail: 스크린샷 경로(예: "img/smile-bank.png"), 없으면 이모지 썸네일
+   ========================================================= */
+const CATS = {
+  "학급 경영": "var(--coral)",
+  "놀이·학습": "var(--cyan)",
+  "포용·소통": "var(--green)",
+  "교사 업무": "var(--violet)"
+};
+
+const apps = [
+  { id:"smile-bank", name:"빛이나라 미소 은행", category:"학급 경영", emoji:"🏦",
+    summary:"학급 화폐·상점 운영, 서명 기록, 실시간 동기화", why:"종이 통장 관리에 매주 시간이 많이 들었다",
+    target:"6학년 / 학생·교사", tags:["HTML","Firebase"], status:"운영 중", thumbnail:null, links:{demo:"",copy:"",guide:""} },
+  { id:"homework", name:"숙제 검사 도우미", category:"학급 경영", emoji:"📝",
+    summary:"신용점수·동물 아이콘·진화 배지로 숙제 확인", why:"숙제 확인이 잔소리가 아니라 성장이 되길 바랐다",
+    target:"6학년 / 학생·교사", tags:["HTML","Firebase"], status:"운영 중", thumbnail:null, links:{demo:"",copy:"",guide:""} },
+  { id:"board", name:"스마트 교실 전광판", category:"학급 경영", emoji:"📺",
+    summary:"시간표·현재 교시 강조·미세먼지·지시사항을 한 화면에", why:"아침마다 칠판에 같은 내용을 다시 적었다",
+    target:"전 학년 / 교사", tags:["HTML","Open-Meteo API"], status:"운영 중", thumbnail:null, links:{demo:"",copy:"",guide:""} },
+  { id:"guestbook", name:"우리 반 디지털 방명록", category:"학급 경영", emoji:"💌",
+    summary:"우리 반만의 디지털 방명록", why:"교실을 찾은 손님의 한마디를 오래 남기고 싶었다",
+    target:"전 학년 / 학생", tags:["HTML"], status:"운영 중", thumbnail:null, links:{demo:"",copy:"",guide:""} },
+  { id:"escape", name:"은진초등학교 방탈출 게임", category:"놀이·학습", emoji:"🔐",
+    summary:"7단계 논리 퍼즐, 단계별 5회 도전", why:"문제 풀이를 '하고 싶은 일'로 바꾸고 싶었다",
+    target:"5~6학년 / 학생", tags:["HTML","localStorage"], status:"운영 중", thumbnail:null, links:{demo:"",copy:"",guide:""} },
+  { id:"pet", name:"포켓 펫 가든", category:"놀이·학습", emoji:"🐣",
+    summary:"다마고치형 반려 펫 키우기", why:"꾸준함을 눈에 보이게 만들어 주고 싶었다",
+    target:"전 학년 / 학생", tags:["HTML","localStorage"], status:"운영 중", thumbnail:null, links:{demo:"",copy:"",guide:""} },
+  { id:"paint", name:"알록달록 디지털 그림판", category:"놀이·학습", emoji:"🎨",
+    summary:"학생용 그림판", why:"광고 없는 단순한 그림판이 필요했다",
+    target:"전 학년 / 학생", tags:["HTML"], status:"운영 중", thumbnail:null, links:{demo:"",copy:"",guide:""} },
+  { id:"portal", name:"빛이나라 배움 놀이터", category:"놀이·학습", emoji:"🛝",
+    summary:"우리 반 앱을 모은 학생/관리자 포털", why:"앱이 늘어나자 링크 찾는 데만 시간이 갔다",
+    target:"6학년 / 학생·교사", tags:["HTML"], status:"운영 중", thumbnail:null, links:{demo:"",copy:"",guide:""} },
+  { id:"aac", name:"AAC 감정 소통판", category:"포용·소통", emoji:"💬",
+    summary:"그림을 누르면 감정을 읽어 주는 TTS 소통판", why:"말로 표현하기 어려운 친구도 마음을 전할 수 있도록",
+    target:"전 학년 / 학생", tags:["HTML","Web Speech"], status:"운영 중", thumbnail:null, links:{demo:"",copy:"",guide:""} },
+  { id:"korean", name:"다국어 한국어 학습 앱", category:"포용·소통", emoji:"🌏",
+    summary:"훈민정음 설명서·프렌드리·단짝 친구 메이커", why:"한국어가 서툰 친구와 반이 함께 웃을 수 있도록",
+    target:"다문화 학생·학급", tags:["HTML","GAS"], status:"운영 중", thumbnail:null, links:{demo:"",copy:"",guide:""} },
+  { id:"vp-guide", name:"교감 실무 길라잡이", category:"교사 업무", emoji:"🧭",
+    summary:"서울 초등 교감 연간 업무·체크리스트·참고 링크", why:"흩어진 업무 자료를 한곳에서 찾고 싶었다",
+    target:"교감·교원", tags:["HTML"], status:"운영 중", thumbnail:null, links:{demo:"",copy:"",guide:""} },
+  { id:"wing", name:"위잉위잉: WING×ACT 실천 가이드", category:"교사 업무", emoji:"🐝",
+    summary:"ACT-WING 프로젝트 도구 모음", why:"프로젝트 수업 도구를 다른 선생님도 바로 쓰도록",
+    target:"교사", tags:["HTML"], status:"운영 중", thumbnail:null, links:{demo:"",copy:"",guide:""} },
+  { id:"record", name:"생기부 평어 생성 서비스", category:"교사 업무", emoji:"✍️",
+    summary:"성취기준 기반 평어 초안 생성 (교사 검토 필수)", why:"초안은 AI가, 판단과 책임은 교사가",
+    target:"교사", tags:["AI API"], status:"개발 중", thumbnail:null, links:{demo:"",copy:"",guide:""} }
+];
+
+/* 히어로 부채꼴 카드: apps의 id와 색 */
+const FAN = [
+  { id:"vp-guide", color:"violet", x:-400, y:70, r:-14 },
+  { id:"smile-bank", color:"coral", x:-205, y:22, r:-7 },
+  { id:"escape", color:"cyan", x:0, y:0, r:0, hero:true },
+  { id:"aac", color:"green", x:205, y:22, r:7 },
+  { id:"board", color:"blue", x:400, y:70, r:14 }
+];
+
+const projects = [
+  { hash:"a1f3c9e", title:"말이 달라도 함께 웃는 학교", desc:"다문화 포용 프로젝트. 콘페스타 발표 신청 — 실패 경험과 성찰까지 기록했습니다.", tools:["GEM","FigJam","ZEP","제미나이","바이브코딩"] },
+  { hash:"7be204d", title:"ZEP 메타버스 공개수업", desc:"다문화 포용을 주제로 한 메타버스 공개수업", tools:["ZEP"] },
+  { hash:"3c88a1f", title:"미래 신문 만들기", desc:"인권 주제 창체 수업, 백캐스팅으로 미래를 먼저 그려 보기", tools:["Google Docs","Canva"] },
+  { hash:"e9d0b52", title:"월드컵으로 배우는 그래프", desc:"6학년 수학, 월드컵 데이터로 그래프 읽고 그리기", tools:["뤼튼","통그라미"] }
+];
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+const $ = (s, el=document) => el.querySelector(s);
+const $$ = (s, el=document) => [...el.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function linkBtn(url, label, primary){
+  const cls = "act" + (primary ? " primary" : "");
+  return url
+    ? `<a class="${cls}" href="${esc(url)}" target="_blank" rel="noopener">${label}</a>`
+    : `<a class="${cls}" aria-disabled="true" title="링크 준비 중" tabindex="-1">${label}</a>`;
+}
+
+// fan
+$("#fan").innerHTML = FAN.map((f, i) => {
+  const a = apps.find(x => x.id === f.id);
+  const z = 5 - Math.abs(i - 2);
+  return `<a class="fan-card c-${f.color}" href="#app-${a.id}" style="--x:${f.x}px;--y:${f.y}px;--r:${f.r}deg;z-index:${z}">
+    ${f.hero ? `<span class="try">체험하기 <i>↗</i></span>` : ""}
+    <h3>${esc(a.name.replace("은진초등학교 ",""))}</h3>
+    <div class="cat">${esc(a.category)}</div>
+    <div class="art"><div class="blob"></div><span class="emoji">${a.emoji}</span>
+      <span class="deco" style="width:26px;height:26px;left:-14px;top:30px;background:var(--lime)"></span>
+      <span class="deco" style="width:16px;height:16px;right:-6px;top:6px;background:#fff"></span>
+    </div>
+  </a>`;
+}).join("");
+
+// chips
+const chipList = ["전체", ...Object.keys(CATS)];
+$("#chips").innerHTML = chipList.map((c, i) => {
+  const n = c === "전체" ? apps.length : apps.filter(a => a.category === c).length;
+  return `<button class="chip${i===0?" on":""}" role="tab" aria-selected="${i===0}" data-cat="${c}" style="--cc:${CATS[c]||"#fff"}">${c!=="전체"?'<span class="dot"></span>':""}${c}<span class="n">${n}</span></button>`;
+}).join("");
+
+// app cards
+$("#appsGrid").innerHTML = apps.map(a => `
+  <article class="app rv" id="app-${a.id}" data-cat="${a.category}" style="--cc:${CATS[a.category]}">
+    <div class="app-thumb">
+      ${a.thumbnail ? `<img src="${esc(a.thumbnail)}" alt="${esc(a.name)} 화면" loading="lazy">` : `<span class="emoji">${a.emoji}</span>`}
+      <span class="badge${a.status==="개발 중"?" dev":""}">${a.status}</span>
+      <span class="app-cat">${a.category}</span>
+    </div>
+    <div class="app-body">
+      <h3>${esc(a.name)}</h3>
+      <p class="sum">${esc(a.summary)}</p>
+      <p class="why">// why: ${esc(a.why)}</p>
+      <div class="app-meta"><span class="target">👥 ${esc(a.target)}</span>${a.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>
+      <div class="app-actions">
+        ${linkBtn(a.links.demo, "체험하기", true)}
+        ${linkBtn(a.links.copy, "사본 받기")}
+        ${linkBtn(a.links.guide, "사용법")}
+      </div>
+    </div>
+  </article>`).join("");
+
+// filter
+$("#chips").addEventListener("click", e => {
+  const b = e.target.closest(".chip"); if (!b) return;
+  $$(".chip").forEach(c => { c.classList.toggle("on", c === b); c.setAttribute("aria-selected", c === b); });
+  const cat = b.dataset.cat;
+  $$(".app").forEach(card => {
+    const show = cat === "전체" || card.dataset.cat === cat;
+    card.classList.toggle("hide", !show);
+    if (show) { card.classList.remove("in"); requestAnimationFrame(() => requestAnimationFrame(() => card.classList.add("in"))); }
+  });
+});
+
+// projects git log
+$("#gitlog").innerHTML = projects.map(p => `
+  <div class="commit">
+    <span class="hash">${p.hash}</span>
+    <div><h4>${esc(p.title)}</h4><p>${esc(p.desc)}</p><div class="tools">${p.tools.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div></div>
+    <a class="act" aria-disabled="true" title="공개 가능한 자료 준비 중" tabindex="-1">지도안 보기</a>
+  </div>`).join("");
+
+/* =========================================================
+   INTERACTIONS
+   ========================================================= */
+// typing rotation
+(() => {
+  const words = ["학급 은행을 만드는", "방탈출 게임을 만드는", "교감 업무를 돕는", "AI 연수를 하는"];
+  const el = $("#typed");
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { el.textContent = words[0]; return; }
+  let w = 0, i = 0, del = false;
+  (function tick(){
+    const word = words[w];
+    el.textContent = word.slice(0, i);
+    if (!del && i < word.length) { i++; setTimeout(tick, 95); }
+    else if (!del) { del = true; setTimeout(tick, 1600); }
+    else if (i > 0) { i--; setTimeout(tick, 45); }
+    else { del = false; w = (w + 1) % words.length; setTimeout(tick, 300); }
+  })();
+})();
+
+// spline: 캐릭터(장면 중앙)가 .stage 가운데 오도록 iframe 높이 맞춤
+const sp = $("#spline"), stage = $("#stage"), hero = $("#home");
+function fitSpline(){ const c = stage.getBoundingClientRect().top - hero.getBoundingClientRect().top + stage.offsetHeight/2; sp.style.height = Math.round(c*2) + "px"; }
+fitSpline(); addEventListener("resize", fitSpline); document.fonts && document.fonts.ready.then(fitSpline);
+sp.addEventListener("load", () => sp.classList.add("loaded"));
+setTimeout(() => sp.classList.add("loaded"), 4000);
+
+// nav scrolled + scrollspy
+const nav = $("#nav");
+const links = $$(".nav-pill a");
+const sections = links.map(l => $(l.getAttribute("href")));
+function onScroll(){
+  nav.classList.toggle("scrolled", scrollY > 40);
+  let cur = sections[0];
+  sections.forEach(s => { if (s && s.getBoundingClientRect().top < innerHeight * .4) cur = s; });
+  links.forEach(l => l.classList.toggle("active", l.getAttribute("href") === "#" + cur.id));
+}
+addEventListener("scroll", onScroll, { passive:true }); onScroll();
+
+// mobile menu
+const pill = $("#navPill"), menuBtn = $("#menuBtn");
+menuBtn.addEventListener("click", () => {
+  const open = pill.classList.toggle("open");
+  menuBtn.setAttribute("aria-expanded", open);
+  menuBtn.textContent = open ? "✕" : "≡";
+});
+links.forEach(l => l.addEventListener("click", () => { pill.classList.remove("open"); menuBtn.textContent = "≡"; menuBtn.setAttribute("aria-expanded", false); }));
+
+// reveal
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+}), { threshold:.12, rootMargin:"0px 0px -40px 0px" });
+$$(".rv").forEach((el, i) => { el.style.transitionDelay = (i % 3) * 70 + "ms"; io.observe(el); });
+
+// count up
+const cio = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  const el = e.target, to = +el.dataset.count; cio.unobserve(el);
+  if (!to) return; // 값이 없으면 ○○ 유지
+  const t0 = performance.now();
+  (function step(t){ const p = Math.min(1, (t - t0) / 1200); el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(step); })(t0);
+}), { threshold:.5 });
+$$("[data-count]").forEach(el => cio.observe(el));
+
+// copy
+const toast = $("#toast");
+function showToast(msg){ toast.textContent = msg; toast.classList.add("show"); clearTimeout(showToast.t); showToast.t = setTimeout(() => toast.classList.remove("show"), 1800); }
+$$(".copy-btn").forEach(b => b.addEventListener("click", async () => {
+  const text = $("#" + b.dataset.copyTarget).innerText;
+  try { await navigator.clipboard.writeText(text); }
+  catch { const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); }
+  const old = b.textContent; b.textContent = "✓ 복사됨"; b.classList.add("done"); showToast("클립보드에 복사했어요");
+  setTimeout(() => { b.textContent = old; b.classList.remove("done"); }, 1600);
+}));
+
+// disabled links
+document.addEventListener("click", e => {
+  const d = e.target.closest('[aria-disabled="true"]');
+  if (d) { e.preventDefault(); showToast("링크를 준비하고 있어요"); }
+});
+</script>
+</body>
 </html>
