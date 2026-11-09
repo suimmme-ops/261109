@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Nanum+Pen+Script&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap">
 <style>
 /* =========================================================
    TOKENS
@@ -22,7 +22,6 @@
   --coral:#ff6b6b; --cyan:#1fc7d4; --green:#6fe07a; --violet:#8b7cf6; --blue:#4d7cff; --amber:#ffb84d;
   --mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
   --sans:"Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-  --pen:"Nanum Pen Script", cursive;
   --r:20px; --r-sm:12px;
   --max:1180px;
 }
@@ -85,7 +84,7 @@ img{max-width:100%;display:block}
 .hero h1{margin-top:26px;font-size:clamp(40px,7vw,84px);line-height:1.12;font-weight:700;letter-spacing:-.035em}
 .hero h1 .l1{display:block;background:linear-gradient(180deg,#fff 30%,#bdbdc9);-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero h1 .l2{display:block;background:linear-gradient(180deg,#e9e9ef 20%,#8f8f9c);-webkit-background-clip:text;background-clip:text;color:transparent}
-.hero h1 .pen{font-family:var(--pen);font-weight:400;font-size:1.28em;letter-spacing:0;line-height:.8;padding:0 .06em;background:linear-gradient(100deg,var(--lime),#7cf3e6 60%,#a99cff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero h1 .pen{font-family:var(--sans);font-weight:800;letter-spacing:-.04em;padding:0 .04em 0 0;background:linear-gradient(100deg,var(--lime),#7cf3e6 60%,#a99cff);-webkit-background-clip:text;background-clip:text;color:transparent}
 .stage{height:clamp(180px,27vh,280px);position:relative}
 .stage-hint{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.08em}
 .hero .sub{margin:0 auto;max-width:580px;color:var(--muted);font-size:clamp(15px,1.6vw,17px)}
@@ -277,7 +276,7 @@ section.block{padding:120px 0 40px}
 .quote::after{content:"”";position:absolute;right:30px;bottom:-60px;font-size:260px;font-family:Georgia,serif;color:rgba(255,255,255,.04);line-height:1}
 .quote .label{font-family:var(--mono);font-size:12px;color:var(--dim)}
 .quote blockquote{margin-top:16px;font-size:clamp(24px,3vw,34px);font-weight:700;letter-spacing:-.03em;line-height:1.35}
-.quote blockquote em{font-style:normal;font-family:var(--pen);font-weight:400;font-size:1.3em;color:var(--lime)}
+.quote blockquote em{font-style:normal;font-weight:800;color:var(--lime)}
 .quote p{margin-top:22px;color:var(--muted);font-size:15.5px;max-width:520px}
 .dev-badge{margin-top:26px;display:inline-flex;align-items:center;gap:10px;padding:8px 14px 8px 8px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--line);font-size:13.5px}
 .dev-badge b{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--lime);color:#111;font-family:var(--mono);font-size:13px}
@@ -299,7 +298,7 @@ section.block{padding:120px 0 40px}
 .contact > *{position:relative}
 @keyframes spin{to{transform:rotate(360deg)}}
 .contact h2{margin-top:18px;font-size:clamp(30px,4.6vw,54px);letter-spacing:-.035em;line-height:1.2}
-.contact h2 .pen{font-family:var(--pen);font-weight:400;font-size:1.25em;color:var(--lime)}
+.contact h2 .pen{font-weight:800;color:var(--lime)}
 .contact > p{margin:14px auto 0;color:var(--muted);max-width:520px}
 .contact-cards{margin:36px auto 0;max-width:760px;display:grid;grid-template-columns:1.4fr 1fr;gap:12px;text-align:left}
 .c-card{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px;border-radius:16px;background:rgba(10,10,13,.6);border:1px solid var(--line-2);backdrop-filter:blur(8px)}
@@ -448,7 +447,7 @@ footer{padding:50px 0 40px;display:flex;justify-content:space-between;align-item
           <ul class="timeline">
             <li style="--lc:var(--cyan)">서울은진초등학교 교사<span>6학년 담임</span></li>
             <li style="--lc:var(--violet)">숙명여자대학교 AI융합교육 대학원 재학</li>
-            <li style="--lc:var(--lime)">제20회 디지털교육연구대회 전국 입상<span>ACT-WING 프로젝트로 미래시민역량 기르기</span></li>
+            <li style="--lc:var(--lime)">제 20회 디지털교육연구대회 전국 2등급 입상<span>ACT-WING 프로젝트로 미래시민역량 기르기</span></li>
             <li style="--lc:var(--coral)">《교사를 위한 AI 에듀테크 수업·생활·업무 대백과》 저자<span>2026</span></li>
           </ul>
         </div>
@@ -495,7 +494,7 @@ footer{padding:50px 0 40px;display:flex;justify-content:space-between;align-item
           <div class="label">// featured · HEAD → main</div>
           <h3>ACT-WING 프로젝트<br>미래시민역량 기르기</h3>
         </div>
-        <span class="award">🏆 제20회 디지털교육연구대회 출품</span>
+        <span class="award">🏆 제 20회 디지털교육연구대회 전국 2등급 입상</span>
       </div>
       <div class="formula">
         <div class="f-box"><b style="color:var(--cyan)">ACT</b><p>디지털 활용 전략 → <strong style="color:var(--text)">주도성</strong></p></div>
